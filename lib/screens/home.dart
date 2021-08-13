@@ -27,7 +27,6 @@ class _HomeState extends State<Home> {
 
   @override
   void initState() {
-    //box.put(0, lastTimeInit);
     pullLastTime();
     super.initState();
   }
@@ -55,11 +54,15 @@ class _HomeState extends State<Home> {
     }
   }
 
-  void lasttimeToAdd() {
+  Future lasttimeToAdd() async {
     LastTime lasttimeToAdd = LastTime(
         titleToAdd, dropdownValueToAdd, DateTime.now(), DateTime.now());
+    await box.clear();
+    lastTimeBox.insert(0, lasttimeToAdd);
+    lastTimeBox.asMap().forEach((index, value) {
+      box.put(index, value);
+    });
     setState(() {
-      box.put(box.length, lasttimeToAdd);
       pullLastTime();
     });
   }

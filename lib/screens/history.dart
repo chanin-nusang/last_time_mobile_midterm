@@ -12,48 +12,45 @@ class History extends StatefulWidget {
 class _HistoryState extends State<History> {
   var historyBox = Hive.box<LastTime>('history');
 
-  List<LastTime> lastTimeHistory = [];
+  List<LastTime> historyAll = [];
+  List<LastTime> historyItem = [];
   List<String> category = ['All', 'Chores', 'Learning', 'Body Care', 'People'];
   String dropdownValue = 'All';
-  String dropdownValueToAdd = 'Chores';
-  String titleToAdd = '';
-  TextEditingController _controller = new TextEditingController();
 
   @override
   void initState() {
-    //box.put(0, lastTimeInit);
     pullHistory();
     super.initState();
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
   }
 
   void pullHistory() {
     print('historyBox lenght : ${historyBox.length}');
     try {
-      lastTimeHistory = historyBox.values.toList();
-      print('lastTimeHistory lenght : ${lastTimeHistory.length}');
+      historyAll = historyBox.values.toList();
+      print('lastTimeBox lenght : ${historyAll.length}');
+      if (dropdownValue == 'All')
+        historyItem = historyAll;
+      else {
+        historyItem = historyAll
+            .where((element) => element.category == dropdownValue)
+            .toList();
+      }
     } catch (e) {
       print(e);
     }
   }
 
   Future deleteItem(LastTime item) async {
-    lastTimeHistory = historyBox.values.toList();
-    print('lastTimeBox lenght in delete : ${lastTimeHistory.length}');
-    int index = lastTimeHistory
+    historyAll = historyBox.values.toList();
+    print('lastTimeBox lenght in delete : ${historyAll.length}');
+    int index = historyAll
         .indexWhere((element) => element.targetTime == item.targetTime);
-    lastTimeHistory.removeAt(index);
-    print(
-        'lastTimeBox lenght in delete after remove : ${lastTimeHistory.length}');
+    historyAll.removeAt(index);
+    print('lastTimeBox lenght in delete after remove : ${historyAll.length}');
     // await box.delete(index);
     await historyBox.clear();
-    if (lastTimeHistory.isNotEmpty) {
-      lastTimeHistory.asMap().forEach((index, value) {
+    if (historyAll.isNotEmpty) {
+      historyAll.asMap().forEach((index, value) {
         historyBox.put(index, value);
       });
     }
@@ -68,7 +65,7 @@ class _HistoryState extends State<History> {
         appBar: AppBar(
           title: Padding(
             padding: const EdgeInsets.only(left: 0),
-            child: Text('Last Time',
+            child: Text('History',
                 style: TextStyle(color: Colors.black, fontSize: 20)),
           ),
           brightness: Brightness.light, //centerTitle: true,
@@ -77,7 +74,46 @@ class _HistoryState extends State<History> {
         body: Container(
           child: Column(
             children: [
-              if (lastTimeHistory.isEmpty)
+              Padding(
+                padding: const EdgeInsets.only(left: 20, right: 20),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.filter_list,
+                      color: Colors.grey[600],
+                    ),
+                    DropdownButton<String>(
+                      value: dropdownValue,
+                      icon: const Icon(Icons.arrow_downward),
+                      iconSize: 24,
+                      elevation: 16,
+                      underline: Container(
+                        height: 2,
+                        color: Theme.of(context).accentColor,
+                      ),
+                      onChanged: (String? newValue) {
+                        setState(() {
+                          dropdownValue = newValue!;
+                          pullHistory();
+                        });
+                      },
+                      items: <String>[
+                        'All',
+                        'Chores',
+                        'Learning',
+                        'Body Care',
+                        'People'
+                      ].map<DropdownMenuItem<String>>((String value) {
+                        return DropdownMenuItem<String>(
+                          value: value,
+                          child: Text(value),
+                        );
+                      }).toList(),
+                    ),
+                  ],
+                ),
+              ),
+              if (historyItem.isEmpty)
                 Padding(
                   padding: const EdgeInsets.only(left: 20, right: 20, top: 30),
                   child: Center(child: Text('No History List.')),
@@ -91,9 +127,9 @@ class _HistoryState extends State<History> {
                         scrollDirection: Axis.vertical,
                         shrinkWrap: true,
                         physics: const AlwaysScrollableScrollPhysics(),
-                        itemCount: lastTimeHistory.length,
+                        itemCount: historyItem.length,
                         itemBuilder: (BuildContext context, int index) {
-                          LastTime _lastTime = lastTimeHistory[index];
+                          LastTime _lastTime = historyItem[index];
                           return Wrap(
                             children: [
                               LasttimeTile(
@@ -103,7 +139,7 @@ class _HistoryState extends State<History> {
                                       deleteItem(lasttime!);
                                     });
                                   }),
-                              if (index < lastTimeHistory.length - 1)
+                              if (index < historyItem.length - 1)
                                 Padding(
                                   padding: const EdgeInsets.only(
                                       left: 16, right: 16),
