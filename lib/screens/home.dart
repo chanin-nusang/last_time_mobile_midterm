@@ -158,57 +158,64 @@ class LasttimeTile extends StatelessWidget {
   final LastTime? lasttime;
   static Map<String, Icon> categoryIcons = {
     'Chores': Icon(
-      Icons.home_rounded,
+      Icons.home_outlined,
       size: 30,
     ),
     'Learning': Icon(
-      Icons.book,
+      Icons.book_outlined,
       size: 30,
     ),
     'Body Care': Icon(
-      Icons.face,
+      Icons.face_outlined,
       size: 30,
     ),
     'People': Icon(
-      Icons.person,
+      Icons.person_outline,
       size: 30,
     ),
   };
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-        child: Row(children: [
-      Flexible(
-        flex: 10,
-        child: Container(
-            child: categoryIcons[lasttime?.category ??
-                Icon(
-                  Icons.home,
-                  size: 30,
-                )]),
-      ),
-      SizedBox(
-        width: 10,
-      ),
-      Flexible(
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Expanded(
-              flex: 2,
-              child: Text(
-                lasttime?.title ?? ' ',
-                style: TextStyle(fontSize: 18),
-              ),
+    return Material(
+      child: Ink(
+          decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(10),
+                  topRight: Radius.circular(10),
+                  bottomLeft: Radius.circular(10),
+                  bottomRight: Radius.circular(10))),
+          child: InkWell(
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Row(children: [
+                Container(
+                    child: categoryIcons[lasttime?.category ??
+                        Icon(
+                          Icons.home,
+                          size: 30,
+                        )]),
+                SizedBox(
+                  width: 10,
+                ),
+                Expanded(
+                    flex: 1,
+                    child: Row(
+                      children: [
+                        Text(
+                          lasttime?.title ?? ' ',
+                          style: TextStyle(fontSize: 18),
+                        ),
+                      ],
+                    )),
+                Text(
+                  '${lasttime?.targetTime!.day.toString() ?? ' '}/${lasttime?.targetTime!.month.toString() ?? ' '}',
+                  style: TextStyle(fontSize: 20),
+                ),
+              ]),
             ),
-            Text(
-              '${lasttime?.targetTime!.day.toString() ?? ' '}/${lasttime?.targetTime!.month.toString() ?? ' '}',
-              style: TextStyle(fontSize: 20),
-            )
-          ],
-        ),
-      ),
-    ]));
+          )),
+    );
   }
 }
