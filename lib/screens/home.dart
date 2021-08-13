@@ -21,13 +21,19 @@ class _HomeState extends State<Home> {
   String dropdownValue = 'All';
   String dropdownValueToAdd = 'Chores';
   String titleToAdd = '';
-  TextEditingController _controller = TextEditingController();
+  TextEditingController _controller = new TextEditingController();
 
   @override
   void initState() {
-    box.put(0, lastTimeInit);
+    //box.put(0, lastTimeInit);
     pullLastTime();
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
   }
 
   void pullLastTime() {
@@ -51,7 +57,7 @@ class _HomeState extends State<Home> {
     LastTime lasttimeToAdd = LastTime(
         titleToAdd, dropdownValueToAdd, DateTime.now(), DateTime.now());
     setState(() {
-      box.put(0, lasttimeToAdd);
+      box.put(DateTime.now().toString(), lasttimeToAdd);
       pullLastTime();
     });
   }
@@ -127,107 +133,127 @@ class _HomeState extends State<Home> {
                       ),
                       label: Text('Add'),
                       onPressed: () {
+                        setState(() {
+                          titleToAdd = '';
+                          dropdownValueToAdd = 'Chores';
+                        });
+
                         showDialog(
                             context: context,
                             builder: (BuildContext dialogContext) {
-                              return AlertDialog(
-                                title: Text(
-                                  'Add a Task',
-                                  style: TextStyle(fontSize: 18),
-                                ),
-                                content: Wrap(
-                                  children: [
-                                    Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.start,
-                                          children: [
-                                            Text('Title : '),
-                                            Container(
-                                              width: 150,
-                                              height: 40,
-                                              child: TextField(
-                                                style: TextStyle(
-                                                    fontSize: 18.0,
-                                                    color: Colors.black),
-                                                controller: _controller,
-                                                decoration: InputDecoration(
-                                                  border: OutlineInputBorder(),
-                                                  isDense: true,
-                                                  focusColor: Theme.of(context)
+                              return StatefulBuilder(builder:
+                                  (BuildContext context, StateSetter setState) {
+                                return AlertDialog(
+                                  title: Text(
+                                    'Add a Task',
+                                    style: TextStyle(fontSize: 18),
+                                  ),
+                                  content: Wrap(
+                                    children: [
+                                      Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.start,
+                                            children: [
+                                              Text('Title : '),
+                                              Container(
+                                                width: 150,
+                                                height: 40,
+                                                child: TextField(
+                                                  style: TextStyle(
+                                                      fontSize: 18.0,
+                                                      color: Colors.black),
+                                                  controller: _controller,
+                                                  decoration: InputDecoration(
+                                                    border:
+                                                        OutlineInputBorder(),
+                                                    isDense: true,
+                                                    focusColor:
+                                                        Theme.of(context)
+                                                            .accentColor,
+                                                  ),
+                                                  onChanged: (text) {
+                                                    setState(() {
+                                                      titleToAdd = text;
+                                                    });
+                                                  },
+                                                ),
+                                              )
+                                            ],
+                                          ),
+                                          Divider(),
+                                          Row(
+                                            children: [
+                                              Text("Catagory : "),
+                                              DropdownButton<String>(
+                                                value: dropdownValueToAdd,
+                                                icon: const Icon(
+                                                    Icons.arrow_downward),
+                                                iconSize: 24,
+                                                elevation: 16,
+                                                underline: Container(
+                                                  height: 2,
+                                                  color: Theme.of(context)
                                                       .accentColor,
                                                 ),
-                                                onSaved: (text) {
+                                                onChanged: (String? newValue) {
                                                   setState(() {
-                                                    titleToAdd = text;
+                                                    dropdownValueToAdd =
+                                                        newValue!;
+                                                    print(
+                                                        'Selected category : $dropdownValueToAdd');
                                                   });
                                                 },
+                                                items: <String>[
+                                                  'Chores',
+                                                  'Learning',
+                                                  'Body Care',
+                                                  'People'
+                                                ].map<DropdownMenuItem<String>>(
+                                                    (String value) {
+                                                  return DropdownMenuItem<
+                                                      String>(
+                                                    value: value,
+                                                    child: Text(value),
+                                                  );
+                                                }).toList(),
                                               ),
-                                            )
-                                          ],
+                                            ],
+                                          ),
+                                        ],
+                                      )
+                                    ],
+                                  ),
+                                  actions: <Widget>[
+                                    TextButton(
+                                      child: Text(
+                                        'Cancel',
+                                        style: TextStyle(
+                                          color: Theme.of(context).accentColor,
                                         ),
-                                        Divider(),
-                                        Row(
-                                          children: [
-                                            Text("Catagory : "),
-                                            DropdownButton<String>(
-                                              value: dropdownValueToAdd,
-                                              icon: const Icon(
-                                                  Icons.arrow_downward),
-                                              iconSize: 24,
-                                              elevation: 16,
-                                              underline: Container(
-                                                height: 2,
-                                                color: Theme.of(context)
-                                                    .accentColor,
-                                              ),
-                                              onChanged: (String? newValue) {
-                                                setState(() {
-                                                  dropdownValueToAdd =
-                                                      newValue!;
-                                                });
-                                              },
-                                              items: <String>[
-                                                'Chores',
-                                                'Learning',
-                                                'Body Care',
-                                                'People'
-                                              ].map<DropdownMenuItem<String>>(
-                                                  (String value) {
-                                                return DropdownMenuItem<String>(
-                                                  value: value,
-                                                  child: Text(value),
-                                                );
-                                              }).toList(),
-                                            ),
-                                          ],
-                                        ),
-                                      ],
-                                    )
-                                  ],
-                                ),
-                                actions: <Widget>[
-                                  TextButton(
-                                    child: Text(
-                                      'Cancel',
-                                      style: TextStyle(
-                                        color: Theme.of(context).accentColor,
                                       ),
+                                      onPressed: () {
+                                        Navigator.of(dialogContext)
+                                            .pop(); // Dismiss alert dialog
+                                      },
                                     ),
-                                    onPressed: () {
-                                      Navigator.of(dialogContext)
-                                          .pop(); // Dismiss alert dialog
-                                    },
-                                  ),
-                                  ElevatedButton(
-                                    child: Text('Add'),
-                                    onPressed: () {},
-                                  ),
-                                ],
-                              );
+                                    ElevatedButton(
+                                      child: Text('Add'),
+                                      onPressed: () {
+                                        try {
+                                          lasttimeToAdd();
+                                          Navigator.of(dialogContext).pop();
+                                        } catch (e) {
+                                          print(e);
+                                        }
+                                      },
+                                    ),
+                                  ],
+                                );
+                              });
                             });
                       },
                     )
