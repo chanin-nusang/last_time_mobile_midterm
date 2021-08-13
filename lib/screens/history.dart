@@ -10,8 +10,19 @@ class History extends StatefulWidget {
 class _HistoryState extends State<History> {
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Text('History'),
+    return Scaffold(
+      appBar: AppBar(
+        title: Text("History",
+            style: TextStyle(color: Colors.black, fontSize: 20)),
+      ),
+      body: Center(
+        child: ElevatedButton(
+          onPressed: () {
+            Navigator.pop(context);
+          },
+          child: Text('Go back!'),
+        ),
+      ),
     );
   }
 }
