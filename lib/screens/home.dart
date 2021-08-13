@@ -12,11 +12,13 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> {
   var box = Hive.box<LastTime>('lasttime');
+  var historyBox = Hive.box<LastTime>('history');
   LastTime lastTimeInit =
       LastTime('ปลูกผัก', 'Chores', DateTime.now(), DateTime.now());
 
   List<LastTime> lastTimeBox = [];
   List<LastTime> lastTimeItem = [];
+  List<LastTime> lastTimeHistory = [];
   List<String> category = ['All', 'Chores', 'Learning', 'Body Care', 'People'];
   String dropdownValue = 'All';
   String dropdownValueToAdd = 'Chores';
@@ -60,6 +62,20 @@ class _HomeState extends State<Home> {
       box.put(box.length, lasttimeToAdd);
       pullLastTime();
     });
+  }
+
+  Future completedItem(LastTime item) async {
+    lastTimeHistory = historyBox.values.toList();
+    print(
+        'lastTimeHistory lenght in completedItem : ${lastTimeHistory.length}');
+    await historyBox.clear();
+    LastTime reTime =
+        LastTime(item.title, item.category, item.targetTime, DateTime.now());
+    lastTimeHistory.insert(0, reTime);
+    lastTimeHistory.asMap().forEach((index, value) {
+      historyBox.put(index, value);
+    });
+    deleteItem(item);
   }
 
   Future deleteItem(LastTime item) async {
@@ -314,9 +330,17 @@ class _HomeState extends State<Home> {
                             children: [
                               LasttimeTile(
                                   lasttime: _lastTime,
-                                  pressAction: (lasttime) => setState(() {
+                                  pressAction: (bool, lasttime) {
+                                    if (bool) {
+                                      setState(() {
                                         deleteItem(lasttime!);
-                                      })),
+                                      });
+                                    } else {
+                                      setState(() {
+                                        completedItem(lasttime!);
+                                      });
+                                    }
+                                  }),
                               if (index < lastTimeItem.length - 1)
                                 Padding(
                                   padding: const EdgeInsets.only(
@@ -337,7 +361,7 @@ class _HomeState extends State<Home> {
 class LasttimeTile extends StatelessWidget {
   LasttimeTile({@required this.lasttime, @required this.pressAction});
   final LastTime? lasttime;
-  final Function(LastTime?)? pressAction;
+  final Function(bool, LastTime?)? pressAction;
   static Map<String, Icon> categoryIcons = {
     'Chores': Icon(
       Icons.home_outlined,
@@ -400,12 +424,15 @@ class LasttimeTile extends StatelessWidget {
                           ),
                           onPressed: () {
                             Navigator.of(dialogContext).pop();
-                            pressAction!(lasttime);
+                            pressAction!(true, lasttime);
                           },
                         ),
                         ElevatedButton(
                           child: Text('Completed'),
-                          onPressed: () {},
+                          onPressed: () {
+                            Navigator.of(dialogContext).pop();
+                            pressAction!(false, lasttime);
+                          },
                         ),
                       ],
                     );
