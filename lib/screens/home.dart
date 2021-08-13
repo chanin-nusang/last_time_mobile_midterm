@@ -12,6 +12,9 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> {
   var box = Hive.box('lasttime');
+  LastTime lastTimeInit =
+      LastTime('ปลูกผัก', 'Chores', DateTime.now(), DateTime.now());
+
   List<LastTime> lastTimeBox = [];
   List<LastTime> lastTimeItem = [];
   List<String> category = ['All', 'Chores', 'Learning', 'Body Care', 'People'];
@@ -19,13 +22,16 @@ class _HomeState extends State<Home> {
 
   @override
   void initState() {
+    box.put('lasttime', lastTimeInit);
     pullLastTime();
     super.initState();
   }
 
-  void pullLastTime() async {
+  void pullLastTime() {
+    print('Box lenght : ${box.length}');
     try {
-      lastTimeBox = await box.get('lasttime');
+      lastTimeBox = box.get('lasttime');
+      print('Box lenght : ${box.length}');
       if (dropdownValue == 'All')
         lastTimeItem = lastTimeBox;
       else {
@@ -33,7 +39,9 @@ class _HomeState extends State<Home> {
             .where((element) => element.category == dropdownValue)
             .toList();
       }
-    } catch (e) {}
+    } catch (e) {
+      print(e);
+    }
   }
 
   @override
@@ -111,7 +119,7 @@ class _HomeState extends State<Home> {
                   ],
                 ),
               ),
-              if (box.isEmpty)
+              if (lastTimeItem.isEmpty)
                 Padding(
                   padding: const EdgeInsets.only(left: 20, right: 20, top: 30),
                   child: Center(child: Text('No Last Time List.')),
@@ -121,13 +129,13 @@ class _HomeState extends State<Home> {
                   padding: const EdgeInsets.only(left: 20, right: 20, top: 30),
                   child: ListView.builder(
                       physics: BouncingScrollPhysics(),
-                      itemCount: box.length,
+                      itemCount: lastTimeItem.length,
                       itemBuilder: (BuildContext context, int index) {
-                        LastTime _lastTime = box.get(index + 1);
+                        LastTime _lastTime = lastTimeItem[index];
                         return Wrap(
                           children: [
                             LasttimeTile(lasttime: _lastTime),
-                            if (index < box.length - 1)
+                            if (index < lastTimeItem.length - 1)
                               Padding(
                                 padding:
                                     const EdgeInsets.only(left: 16, right: 16),
@@ -145,10 +153,30 @@ class _HomeState extends State<Home> {
 
 class LasttimeTile extends StatelessWidget {
   LasttimeTile({@required this.lasttime});
-  final lasttime;
+  final LastTime? lasttime;
 
   @override
   Widget build(BuildContext context) {
-    return Container();
+    return Container(
+      child: Row(
+        children: [
+          Flexible(
+            flex: 10,
+            child: Container(
+              child: Icon(Icons.access_alarm),
+            ),
+          ),
+          Flexible(
+            flex: 20,
+            child: SizedBox(
+              width: 10,
+            ),
+          ),
+          Flexible(
+              flex: 15,
+              child: Text(lasttime?.targetTime!.day.toString() ?? ' ')),
+        ],
+      ),
+    );
   }
 }
