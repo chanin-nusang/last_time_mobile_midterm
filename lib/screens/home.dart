@@ -85,210 +85,236 @@ class _HomeState extends State<Home> {
             )
           ],
         ),
-        body: Container(
-          child: Column(
-            children: [
-              Padding(
-                padding: const EdgeInsets.only(left: 20, right: 20),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Row(
-                      children: [
-                        Text("Catagory : "),
-                        DropdownButton<String>(
-                          value: dropdownValue,
-                          icon: const Icon(Icons.arrow_downward),
-                          iconSize: 24,
-                          elevation: 16,
-                          underline: Container(
-                            height: 2,
-                            color: Theme.of(context).accentColor,
+        body: SingleChildScrollView(
+          physics: NeverScrollableScrollPhysics(),
+          child: Container(
+            child: Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(left: 20, right: 20),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.filter_list,
+                            color: Colors.grey[600],
                           ),
-                          onChanged: (String? newValue) {
-                            setState(() {
-                              dropdownValue = newValue!;
-                            });
-                          },
-                          items: <String>[
-                            'All',
-                            'Chores',
-                            'Learning',
-                            'Body Care',
-                            'People'
-                          ].map<DropdownMenuItem<String>>((String value) {
-                            return DropdownMenuItem<String>(
-                              value: value,
-                              child: Text(value),
-                            );
-                          }).toList(),
-                        ),
-                      ],
-                    ),
-                    ElevatedButton.icon(
-                      icon: Icon(
-                        Icons.add,
-                        // color: Colors.pink,
-                        size: 24.0,
+                          DropdownButton<String>(
+                            value: dropdownValue,
+                            icon: const Icon(Icons.arrow_downward),
+                            iconSize: 24,
+                            elevation: 16,
+                            underline: Container(
+                              height: 2,
+                              color: Theme.of(context).accentColor,
+                            ),
+                            onChanged: (String? newValue) {
+                              setState(() {
+                                dropdownValue = newValue!;
+                                pullLastTime();
+                              });
+                            },
+                            items: <String>[
+                              'All',
+                              'Chores',
+                              'Learning',
+                              'Body Care',
+                              'People'
+                            ].map<DropdownMenuItem<String>>((String value) {
+                              return DropdownMenuItem<String>(
+                                value: value,
+                                child: Text(value),
+                              );
+                            }).toList(),
+                          ),
+                        ],
                       ),
-                      label: Text('Add'),
-                      onPressed: () {
-                        setState(() {
-                          titleToAdd = '';
-                          dropdownValueToAdd = 'Chores';
-                        });
+                      ElevatedButton.icon(
+                        icon: Icon(
+                          Icons.add,
+                          // color: Colors.pink,
+                          size: 24.0,
+                        ),
+                        label: Text('Add'),
+                        onPressed: () {
+                          setState(() {
+                            titleToAdd = '';
+                            dropdownValueToAdd = 'Chores';
+                            _controller.clear();
+                          });
 
-                        showDialog(
-                            context: context,
-                            builder: (BuildContext dialogContext) {
-                              return StatefulBuilder(builder:
-                                  (BuildContext context, StateSetter setState) {
-                                return AlertDialog(
-                                  title: Text(
-                                    'Add a Task',
-                                    style: TextStyle(fontSize: 18),
-                                  ),
-                                  content: Wrap(
-                                    children: [
-                                      Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Row(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.start,
-                                            children: [
-                                              Text('Title : '),
-                                              Container(
-                                                width: 150,
-                                                height: 40,
-                                                child: TextField(
-                                                  style: TextStyle(
-                                                      fontSize: 18.0,
-                                                      color: Colors.black),
-                                                  controller: _controller,
-                                                  decoration: InputDecoration(
-                                                    border:
-                                                        OutlineInputBorder(),
-                                                    isDense: true,
-                                                    focusColor:
+                          showDialog(
+                              context: context,
+                              builder: (BuildContext dialogContext) {
+                                return StatefulBuilder(builder:
+                                    (BuildContext context,
+                                        StateSetter setState) {
+                                  return AlertDialog(
+                                    title: Text(
+                                      'Add a Task',
+                                      style: TextStyle(fontSize: 18),
+                                    ),
+                                    content: Wrap(
+                                      children: [
+                                        Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.start,
+                                              children: [
+                                                Text('Title : '),
+                                                Container(
+                                                  width: 150,
+                                                  height: 40,
+                                                  child: TextField(
+                                                    cursorColor:
                                                         Theme.of(context)
-                                                            .accentColor,
+                                                            .primaryColor,
+                                                    style: TextStyle(
+                                                        fontSize: 18.0,
+                                                        color: Colors.black),
+                                                    controller: _controller,
+                                                    decoration: InputDecoration(
+                                                      border:
+                                                          OutlineInputBorder(),
+                                                      isDense: true,
+                                                      focusedBorder:
+                                                          OutlineInputBorder(
+                                                        borderSide: BorderSide(
+                                                          color:
+                                                              Theme.of(context)
+                                                                  .accentColor,
+                                                        ),
+                                                      ),
+                                                      contentPadding:
+                                                          EdgeInsets.fromLTRB(
+                                                              10, 0, 0, 0),
+                                                    ),
+                                                    onChanged: (text) {
+                                                      setState(() {
+                                                        titleToAdd = text;
+                                                      });
+                                                    },
                                                   ),
-                                                  onChanged: (text) {
+                                                )
+                                              ],
+                                            ),
+                                            Divider(),
+                                            Row(
+                                              children: [
+                                                Text("Catagory : "),
+                                                DropdownButton<String>(
+                                                  value: dropdownValueToAdd,
+                                                  icon: const Icon(
+                                                      Icons.arrow_downward),
+                                                  iconSize: 24,
+                                                  elevation: 16,
+                                                  underline: Container(
+                                                    height: 2,
+                                                    color: Theme.of(context)
+                                                        .accentColor,
+                                                  ),
+                                                  onChanged:
+                                                      (String? newValue) {
                                                     setState(() {
-                                                      titleToAdd = text;
+                                                      dropdownValueToAdd =
+                                                          newValue!;
+                                                      print(
+                                                          'Selected category : $dropdownValueToAdd');
                                                     });
                                                   },
+                                                  items: <String>[
+                                                    'Chores',
+                                                    'Learning',
+                                                    'Body Care',
+                                                    'People'
+                                                  ].map<
+                                                          DropdownMenuItem<
+                                                              String>>(
+                                                      (String value) {
+                                                    return DropdownMenuItem<
+                                                        String>(
+                                                      value: value,
+                                                      child: Text(value),
+                                                    );
+                                                  }).toList(),
                                                 ),
-                                              )
-                                            ],
+                                              ],
+                                            ),
+                                          ],
+                                        )
+                                      ],
+                                    ),
+                                    actions: <Widget>[
+                                      TextButton(
+                                        child: Text(
+                                          'Cancel',
+                                          style: TextStyle(
+                                            color:
+                                                Theme.of(context).accentColor,
                                           ),
-                                          Divider(),
-                                          Row(
-                                            children: [
-                                              Text("Catagory : "),
-                                              DropdownButton<String>(
-                                                value: dropdownValueToAdd,
-                                                icon: const Icon(
-                                                    Icons.arrow_downward),
-                                                iconSize: 24,
-                                                elevation: 16,
-                                                underline: Container(
-                                                  height: 2,
-                                                  color: Theme.of(context)
-                                                      .accentColor,
-                                                ),
-                                                onChanged: (String? newValue) {
-                                                  setState(() {
-                                                    dropdownValueToAdd =
-                                                        newValue!;
-                                                    print(
-                                                        'Selected category : $dropdownValueToAdd');
-                                                  });
-                                                },
-                                                items: <String>[
-                                                  'Chores',
-                                                  'Learning',
-                                                  'Body Care',
-                                                  'People'
-                                                ].map<DropdownMenuItem<String>>(
-                                                    (String value) {
-                                                  return DropdownMenuItem<
-                                                      String>(
-                                                    value: value,
-                                                    child: Text(value),
-                                                  );
-                                                }).toList(),
-                                              ),
-                                            ],
-                                          ),
-                                        ],
-                                      )
-                                    ],
-                                  ),
-                                  actions: <Widget>[
-                                    TextButton(
-                                      child: Text(
-                                        'Cancel',
-                                        style: TextStyle(
-                                          color: Theme.of(context).accentColor,
                                         ),
+                                        onPressed: () {
+                                          Navigator.of(dialogContext)
+                                              .pop(); // Dismiss alert dialog
+                                        },
                                       ),
-                                      onPressed: () {
-                                        Navigator.of(dialogContext)
-                                            .pop(); // Dismiss alert dialog
-                                      },
-                                    ),
-                                    ElevatedButton(
-                                      child: Text('Add'),
-                                      onPressed: () {
-                                        try {
-                                          lasttimeToAdd();
-                                          Navigator.of(dialogContext).pop();
-                                        } catch (e) {
-                                          print(e);
-                                        }
-                                      },
-                                    ),
-                                  ],
-                                );
+                                      ElevatedButton(
+                                        child: Text('Add'),
+                                        onPressed: () {
+                                          try {
+                                            lasttimeToAdd();
+                                            Navigator.of(dialogContext).pop();
+                                          } catch (e) {
+                                            print(e);
+                                          }
+                                        },
+                                      ),
+                                    ],
+                                  );
+                                });
                               });
-                            });
-                      },
-                    )
-                  ],
+                        },
+                      )
+                    ],
+                  ),
                 ),
-              ),
-              if (lastTimeItem.isEmpty)
-                Padding(
-                  padding: const EdgeInsets.only(left: 20, right: 20, top: 30),
-                  child: Center(child: Text('No Last Time List.')),
-                )
-              else
-                Padding(
-                  padding: const EdgeInsets.only(left: 20, right: 20, top: 30),
-                  child: ListView.builder(
-                      scrollDirection: Axis.vertical,
-                      shrinkWrap: true,
-                      physics: BouncingScrollPhysics(),
-                      itemCount: lastTimeItem.length,
-                      itemBuilder: (BuildContext context, int index) {
-                        LastTime _lastTime = lastTimeItem[index];
-                        return Wrap(
-                          children: [
-                            LasttimeTile(lasttime: _lastTime),
-                            if (index < lastTimeItem.length - 1)
-                              Padding(
-                                padding:
-                                    const EdgeInsets.only(left: 16, right: 16),
-                                child: Divider(),
-                              )
-                          ],
-                        );
-                      }),
-                )
-            ],
+                if (lastTimeItem.isEmpty)
+                  Padding(
+                    padding:
+                        const EdgeInsets.only(left: 20, right: 20, top: 30),
+                    child: Center(child: Text('No Last Time List.')),
+                  )
+                else
+                  Padding(
+                    padding:
+                        const EdgeInsets.only(left: 20, right: 20, top: 30),
+                    child: ListView.builder(
+                        scrollDirection: Axis.vertical,
+                        shrinkWrap: true,
+                        physics: BouncingScrollPhysics(),
+                        itemCount: lastTimeItem.length,
+                        itemBuilder: (BuildContext context, int index) {
+                          LastTime _lastTime = lastTimeItem[index];
+                          return Wrap(
+                            children: [
+                              LasttimeTile(lasttime: _lastTime),
+                              if (index < lastTimeItem.length - 1)
+                                Padding(
+                                  padding: const EdgeInsets.only(
+                                      left: 16, right: 16),
+                                  child: Divider(),
+                                )
+                            ],
+                          );
+                        }),
+                  )
+              ],
+            ),
           ),
         ));
   }
