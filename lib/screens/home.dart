@@ -114,7 +114,47 @@ class _HomeState extends State<Home> {
                         size: 24.0,
                       ),
                       label: Text('Add'),
-                      onPressed: () {},
+                      onPressed: () {
+                        showDialog(
+                            context: context,
+                            builder: (BuildContext dialogContext) {
+                              return AlertDialog(
+                                title: Text(
+                                  'Add a Task',
+                                  style: TextStyle(fontSize: 18),
+                                ),
+                                content: Wrap(
+                                  children: [
+                                    Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text('Title : '),
+                                        Divider(),
+                                        Text('Catergory : '),
+                                      ],
+                                    )
+                                  ],
+                                ),
+                                actions: <Widget>[
+                                  TextButton(
+                                    child: Text(
+                                      'Cancel',
+                                      style: TextStyle(color: Colors.red),
+                                    ),
+                                    onPressed: () {
+                                      Navigator.of(dialogContext)
+                                          .pop(); // Dismiss alert dialog
+                                    },
+                                  ),
+                                  ElevatedButton(
+                                    child: Text('Add'),
+                                    onPressed: () {},
+                                  ),
+                                ],
+                              );
+                            });
+                      },
                     )
                   ],
                 ),
@@ -187,6 +227,46 @@ class LasttimeTile extends StatelessWidget {
                   bottomLeft: Radius.circular(10),
                   bottomRight: Radius.circular(10))),
           child: InkWell(
+            borderRadius: BorderRadius.circular(10),
+            onTap: () {
+              showDialog(
+                  context: context,
+                  builder: (BuildContext dialogContext) {
+                    return AlertDialog(
+                      content: Wrap(
+                        children: [
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text('Title : ${lasttime?.title ?? ' '}'),
+                              Divider(),
+                              Text('Category : ${lasttime?.category ?? ' '}'),
+                              Divider(),
+                              Text(
+                                  'Created on : ${lasttime?.targetTime!.day}/${lasttime?.targetTime!.month}/${lasttime?.targetTime!.year}'),
+                            ],
+                          )
+                        ],
+                      ),
+                      actions: <Widget>[
+                        TextButton(
+                          child: Text(
+                            'Delete',
+                            style: TextStyle(color: Colors.red),
+                          ),
+                          onPressed: () {
+                            Navigator.of(dialogContext)
+                                .pop(); // Dismiss alert dialog
+                          },
+                        ),
+                        ElevatedButton(
+                          child: Text('Completed'),
+                          onPressed: () {},
+                        ),
+                      ],
+                    );
+                  });
+            },
             child: Padding(
               padding: const EdgeInsets.all(8.0),
               child: Row(children: [
