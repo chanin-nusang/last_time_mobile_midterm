@@ -6,7 +6,7 @@ import 'package:last_time_mobile_midterm/models/lasttime.dart';
 void main() async {
   await Hive.initFlutter();
   Hive.registerAdapter(LastTimeAdapter());
-  await Hive.openBox('lasttime');
+  await Hive.openBox<LastTime>('lasttime');
   WidgetsFlutterBinding.ensureInitialized();
   runApp(App());
 }

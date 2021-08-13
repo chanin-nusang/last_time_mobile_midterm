@@ -11,7 +11,7 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
-  var box = Hive.box('lasttime');
+  var box = Hive.box<LastTime>('lasttime');
   LastTime lastTimeInit =
       LastTime('ปลูกผัก', 'Chores', DateTime.now(), DateTime.now());
 
@@ -22,7 +22,7 @@ class _HomeState extends State<Home> {
 
   @override
   void initState() {
-    box.put('lasttime', lastTimeInit);
+    box.put(0, lastTimeInit);
     pullLastTime();
     super.initState();
   }
@@ -30,7 +30,7 @@ class _HomeState extends State<Home> {
   void pullLastTime() {
     print('Box lenght : ${box.length}');
     try {
-      lastTimeBox = box.get('lasttime');
+      lastTimeBox = box.values.toList();
       print('Box lenght : ${box.length}');
       if (dropdownValue == 'All')
         lastTimeItem = lastTimeBox;
@@ -128,6 +128,8 @@ class _HomeState extends State<Home> {
                 Padding(
                   padding: const EdgeInsets.only(left: 20, right: 20, top: 30),
                   child: ListView.builder(
+                      scrollDirection: Axis.vertical,
+                      shrinkWrap: true,
                       physics: BouncingScrollPhysics(),
                       itemCount: lastTimeItem.length,
                       itemBuilder: (BuildContext context, int index) {
@@ -154,29 +156,59 @@ class _HomeState extends State<Home> {
 class LasttimeTile extends StatelessWidget {
   LasttimeTile({@required this.lasttime});
   final LastTime? lasttime;
+  static Map<String, Icon> categoryIcons = {
+    'Chores': Icon(
+      Icons.home_rounded,
+      size: 30,
+    ),
+    'Learning': Icon(
+      Icons.book,
+      size: 30,
+    ),
+    'Body Care': Icon(
+      Icons.face,
+      size: 30,
+    ),
+    'People': Icon(
+      Icons.person,
+      size: 30,
+    ),
+  };
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      child: Row(
-        children: [
-          Flexible(
-            flex: 10,
-            child: Container(
-              child: Icon(Icons.access_alarm),
-            ),
-          ),
-          Flexible(
-            flex: 20,
-            child: SizedBox(
-              width: 10,
-            ),
-          ),
-          Flexible(
-              flex: 15,
-              child: Text(lasttime?.targetTime!.day.toString() ?? ' ')),
-        ],
+        child: Row(children: [
+      Flexible(
+        flex: 10,
+        child: Container(
+            child: categoryIcons[lasttime?.category ??
+                Icon(
+                  Icons.home,
+                  size: 30,
+                )]),
       ),
-    );
+      SizedBox(
+        width: 10,
+      ),
+      Flexible(
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Expanded(
+              flex: 2,
+              child: Text(
+                lasttime?.title ?? ' ',
+                style: TextStyle(fontSize: 18),
+              ),
+            ),
+            Text(
+              '${lasttime?.targetTime!.day.toString() ?? ' '}/${lasttime?.targetTime!.month.toString() ?? ' '}',
+              style: TextStyle(fontSize: 20),
+            )
+          ],
+        ),
+      ),
+    ]));
   }
 }
