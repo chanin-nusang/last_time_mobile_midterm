@@ -62,19 +62,24 @@ class _HomeState extends State<Home> {
     });
   }
 
-  // void deleteItem(LastTime item) {
-  //   int index = lastTimeBox
-  //       .indexWhere((element) => element.targetTime == item.targetTime);
-  //   lastTimeBox.removeAt(index);
-  //   box.delete(index);
-  //   box.clear();
-  //   if (lastTimeBox.isNotEmpty) {
-  //     lastTimeBox.asMap().forEach((index, value) {
-  //       box.put(index, value);
-  //     });
-  //   }
-  //   pullLastTime();
-  // }
+  Future deleteItem(LastTime item) async {
+    lastTimeBox = box.values.toList();
+    print('lastTimeBox lenght in delete : ${lastTimeBox.length}');
+    int index = lastTimeBox
+        .indexWhere((element) => element.targetTime == item.targetTime);
+    lastTimeBox.removeAt(index);
+    print('lastTimeBox lenght in delete after remove : ${lastTimeBox.length}');
+    // await box.delete(index);
+    await box.clear();
+    if (lastTimeBox.isNotEmpty) {
+      lastTimeBox.asMap().forEach((index, value) {
+        box.put(index, value);
+      });
+    }
+    setState(() {
+      pullLastTime();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -307,7 +312,11 @@ class _HomeState extends State<Home> {
                           LastTime _lastTime = lastTimeItem[index];
                           return Wrap(
                             children: [
-                              LasttimeTile(lasttime: _lastTime),
+                              LasttimeTile(
+                                  lasttime: _lastTime,
+                                  pressAction: (lasttime) => setState(() {
+                                        deleteItem(lasttime!);
+                                      })),
                               if (index < lastTimeItem.length - 1)
                                 Padding(
                                   padding: const EdgeInsets.only(
@@ -328,7 +337,7 @@ class _HomeState extends State<Home> {
 class LasttimeTile extends StatelessWidget {
   LasttimeTile({@required this.lasttime, @required this.pressAction});
   final LastTime? lasttime;
-  final VoidCallback? pressAction;
+  final Function(LastTime?)? pressAction;
   static Map<String, Icon> categoryIcons = {
     'Chores': Icon(
       Icons.home_outlined,
@@ -347,23 +356,6 @@ class LasttimeTile extends StatelessWidget {
       size: 30,
     ),
   };
-
-  void deleteItem(LastTime item) {
-    var box = Hive.box<LastTime>('lasttime');
-    List<LastTime> lastTimeBox = [];
-    lastTimeBox = box.values.toList();
-    int index = lastTimeBox
-        .indexWhere((element) => element.targetTime == item.targetTime);
-    lastTimeBox.removeAt(index);
-    box.delete(index);
-    box.clear();
-    if (lastTimeBox.isNotEmpty) {
-      lastTimeBox.asMap().forEach((index, value) {
-        box.put(index, value);
-      });
-    }
-    _HomeState().pullLastTime();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -407,8 +399,8 @@ class LasttimeTile extends StatelessWidget {
                             ),
                           ),
                           onPressed: () {
-                            deleteItem(lasttime!);
-                            Navigator.of(dialogContext).pop(context);
+                            Navigator.of(dialogContext).pop();
+                            pressAction!(lasttime);
                           },
                         ),
                         ElevatedButton(
