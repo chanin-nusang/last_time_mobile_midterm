@@ -19,6 +19,9 @@ class _HomeState extends State<Home> {
   List<LastTime> lastTimeItem = [];
   List<String> category = ['All', 'Chores', 'Learning', 'Body Care', 'People'];
   String dropdownValue = 'All';
+  String dropdownValueToAdd = 'Chores';
+  String titleToAdd = '';
+  TextEditingController _controller = TextEditingController();
 
   @override
   void initState() {
@@ -42,6 +45,15 @@ class _HomeState extends State<Home> {
     } catch (e) {
       print(e);
     }
+  }
+
+  void lasttimeToAdd() {
+    LastTime lasttimeToAdd = LastTime(
+        titleToAdd, dropdownValueToAdd, DateTime.now(), DateTime.now());
+    setState(() {
+      box.put(0, lasttimeToAdd);
+      pullLastTime();
+    });
   }
 
   @override
@@ -129,9 +141,70 @@ class _HomeState extends State<Home> {
                                       crossAxisAlignment:
                                           CrossAxisAlignment.start,
                                       children: [
-                                        Text('Title : '),
+                                        Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.start,
+                                          children: [
+                                            Text('Title : '),
+                                            Container(
+                                              width: 150,
+                                              height: 40,
+                                              child: TextField(
+                                                style: TextStyle(
+                                                    fontSize: 18.0,
+                                                    color: Colors.black),
+                                                controller: _controller,
+                                                decoration: InputDecoration(
+                                                  border: OutlineInputBorder(),
+                                                  isDense: true,
+                                                  focusColor: Theme.of(context)
+                                                      .accentColor,
+                                                ),
+                                                onSaved: (text) {
+                                                  setState(() {
+                                                    titleToAdd = text;
+                                                  });
+                                                },
+                                              ),
+                                            )
+                                          ],
+                                        ),
                                         Divider(),
-                                        Text('Catergory : '),
+                                        Row(
+                                          children: [
+                                            Text("Catagory : "),
+                                            DropdownButton<String>(
+                                              value: dropdownValueToAdd,
+                                              icon: const Icon(
+                                                  Icons.arrow_downward),
+                                              iconSize: 24,
+                                              elevation: 16,
+                                              underline: Container(
+                                                height: 2,
+                                                color: Theme.of(context)
+                                                    .accentColor,
+                                              ),
+                                              onChanged: (String? newValue) {
+                                                setState(() {
+                                                  dropdownValueToAdd =
+                                                      newValue!;
+                                                });
+                                              },
+                                              items: <String>[
+                                                'Chores',
+                                                'Learning',
+                                                'Body Care',
+                                                'People'
+                                              ].map<DropdownMenuItem<String>>(
+                                                  (String value) {
+                                                return DropdownMenuItem<String>(
+                                                  value: value,
+                                                  child: Text(value),
+                                                );
+                                              }).toList(),
+                                            ),
+                                          ],
+                                        ),
                                       ],
                                     )
                                   ],
@@ -140,7 +213,9 @@ class _HomeState extends State<Home> {
                                   TextButton(
                                     child: Text(
                                       'Cancel',
-                                      style: TextStyle(color: Colors.red),
+                                      style: TextStyle(
+                                        color: Theme.of(context).accentColor,
+                                      ),
                                     ),
                                     onPressed: () {
                                       Navigator.of(dialogContext)
@@ -252,7 +327,9 @@ class LasttimeTile extends StatelessWidget {
                         TextButton(
                           child: Text(
                             'Delete',
-                            style: TextStyle(color: Colors.red),
+                            style: TextStyle(
+                              color: Theme.of(context).accentColor,
+                            ),
                           ),
                           onPressed: () {
                             Navigator.of(dialogContext)
