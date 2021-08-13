@@ -40,7 +40,7 @@ class _HomeState extends State<Home> {
     print('Box lenght : ${box.length}');
     try {
       lastTimeBox = box.values.toList();
-      print('Box lenght : ${box.length}');
+      print('lastTimeBox lenght : ${lastTimeBox.length}');
       if (dropdownValue == 'All')
         lastTimeItem = lastTimeBox;
       else {
@@ -57,13 +57,22 @@ class _HomeState extends State<Home> {
     LastTime lasttimeToAdd = LastTime(
         titleToAdd, dropdownValueToAdd, DateTime.now(), DateTime.now());
     setState(() {
-      box.put(DateTime.now().toString(), lasttimeToAdd);
+      box.put(box.length, lasttimeToAdd);
       pullLastTime();
     });
   }
 
   void deleteItem(LastTime item) {
-    box.delete(item);
+    int index = lastTimeBox
+        .indexWhere((element) => element.targetTime == item.targetTime);
+    lastTimeBox.removeAt(index);
+    box.delete(index);
+    box.clear();
+    if (lastTimeBox.isNotEmpty) {
+      lastTimeBox.asMap().forEach((index, value) {
+        box.put(index, value);
+      });
+    }
     pullLastTime();
   }
 
