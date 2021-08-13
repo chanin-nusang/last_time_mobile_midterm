@@ -43,11 +43,15 @@ class _HomeState extends State<Home> {
       lastTimeBox = box.values.toList();
       print('lastTimeBox lenght : ${lastTimeBox.length}');
       if (dropdownValue == 'All')
-        lastTimeItem = lastTimeBox;
+        setState(() {
+          lastTimeItem = lastTimeBox;
+        });
       else {
-        lastTimeItem = lastTimeBox
-            .where((element) => element.category == dropdownValue)
-            .toList();
+        setState(() {
+          lastTimeItem = lastTimeBox
+              .where((element) => element.category == dropdownValue)
+              .toList();
+        });
       }
     } catch (e) {
       print(e);
@@ -149,6 +153,7 @@ class _HomeState extends State<Home> {
                           onChanged: (String? newValue) {
                             setState(() {
                               dropdownValue = newValue!;
+                              print('dropdownValue: $dropdownValue');
                               pullLastTime();
                             });
                           },
@@ -320,40 +325,50 @@ class _HomeState extends State<Home> {
               else
                 Expanded(
                   child: Padding(
-                    padding:
-                        const EdgeInsets.only(left: 20, right: 20, top: 30),
-                    child: ListView.builder(
-                        scrollDirection: Axis.vertical,
-                        shrinkWrap: true,
-                        physics: const AlwaysScrollableScrollPhysics(),
-                        itemCount: lastTimeItem.length,
-                        itemBuilder: (BuildContext context, int index) {
-                          LastTime _lastTime = lastTimeItem[index];
-                          return Wrap(
-                            children: [
-                              LasttimeTile(
-                                  lasttime: _lastTime,
-                                  pressAction: (bool, lasttime) {
-                                    if (bool) {
-                                      setState(() {
-                                        deleteItem(lasttime!);
-                                      });
-                                    } else {
-                                      setState(() {
-                                        completedItem(lasttime!);
-                                      });
-                                    }
-                                  }),
-                              if (index < lastTimeItem.length - 1)
-                                Padding(
-                                  padding: const EdgeInsets.only(
-                                      left: 16, right: 16),
-                                  child: Divider(),
-                                )
-                            ],
-                          );
-                        }),
-                  ),
+                      padding:
+                          const EdgeInsets.only(left: 20, right: 20, top: 30),
+                      child: ReorderableListView(
+                        children: <Widget>[
+                          for (int index = 0;
+                              index < lastTimeItem.length;
+                              index++)
+                            LasttimeTile(
+                                key: Key('$index'),
+                                lasttime: lastTimeItem[index],
+                                pressAction: (bool, lasttime) {
+                                  if (bool) {
+                                    setState(() {
+                                      deleteItem(lasttime!);
+                                    });
+                                  } else {
+                                    setState(() {
+                                      completedItem(lasttime!);
+                                    });
+                                  }
+                                }),
+                        ],
+                        onReorder: (int oldIndex, int newIndex) {
+                          setState(() {
+                            if (oldIndex < newIndex) {
+                              newIndex -= 1;
+                            }
+                            if (dropdownValue == 'All') {
+                              final LastTime item =
+                                  lastTimeItem.removeAt(oldIndex);
+                              lastTimeItem.insert(newIndex, item);
+                              box.clear();
+                              lastTimeItem.asMap().forEach((index, value) {
+                                box.put(index, value);
+                              });
+                              print(
+                                  'Box lenght in ReorderableListView : ${box.length}');
+                              print(
+                                  'lastTimeBox lenght in ReorderableListView: ${lastTimeBox.length}');
+                              pullLastTime();
+                            }
+                          });
+                        },
+                      )),
                 )
             ],
           ),
@@ -362,7 +377,8 @@ class _HomeState extends State<Home> {
 }
 
 class LasttimeTile extends StatelessWidget {
-  LasttimeTile({@required this.lasttime, @required this.pressAction});
+  LasttimeTile({Key? key, @required this.lasttime, @required this.pressAction})
+      : super(key: key);
   final LastTime? lasttime;
   final Function(bool, LastTime?)? pressAction;
   static Map<String, Icon> categoryIcons = {
@@ -386,90 +402,93 @@ class LasttimeTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      child: Ink(
-          decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(10),
-                  topRight: Radius.circular(10),
-                  bottomLeft: Radius.circular(10),
-                  bottomRight: Radius.circular(10))),
-          child: InkWell(
-            borderRadius: BorderRadius.circular(10),
-            onTap: () {
-              showDialog(
-                  context: context,
-                  builder: (BuildContext dialogContext) {
-                    return AlertDialog(
-                      content: Wrap(
-                        children: [
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text('Title : ${lasttime?.title ?? ' '}'),
-                              Divider(),
-                              Text('Category : ${lasttime?.category ?? ' '}'),
-                              Divider(),
-                              Text(
-                                  'Created on : ${lasttime?.targetTime!.day}/${lasttime?.targetTime!.month}/${lasttime?.targetTime!.year}'),
-                            ],
-                          )
-                        ],
-                      ),
-                      actions: <Widget>[
-                        TextButton(
-                          child: Text(
-                            'Delete',
-                            style: TextStyle(
-                              color: Theme.of(context).accentColor,
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 15),
+      child: Material(
+        child: Ink(
+            decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(10),
+                    topRight: Radius.circular(10),
+                    bottomLeft: Radius.circular(10),
+                    bottomRight: Radius.circular(10))),
+            child: InkWell(
+              borderRadius: BorderRadius.circular(10),
+              onTap: () {
+                showDialog(
+                    context: context,
+                    builder: (BuildContext dialogContext) {
+                      return AlertDialog(
+                        content: Wrap(
+                          children: [
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text('Title : ${lasttime?.title ?? ' '}'),
+                                Divider(),
+                                Text('Category : ${lasttime?.category ?? ' '}'),
+                                Divider(),
+                                Text(
+                                    'Created on : ${lasttime?.targetTime!.day}/${lasttime?.targetTime!.month}/${lasttime?.targetTime!.year}'),
+                              ],
+                            )
+                          ],
+                        ),
+                        actions: <Widget>[
+                          TextButton(
+                            child: Text(
+                              'Delete',
+                              style: TextStyle(
+                                color: Theme.of(context).accentColor,
+                              ),
                             ),
+                            onPressed: () {
+                              Navigator.of(dialogContext).pop();
+                              pressAction!(true, lasttime);
+                            },
                           ),
-                          onPressed: () {
-                            Navigator.of(dialogContext).pop();
-                            pressAction!(true, lasttime);
-                          },
-                        ),
-                        ElevatedButton(
-                          child: Text('Completed'),
-                          onPressed: () {
-                            Navigator.of(dialogContext).pop();
-                            pressAction!(false, lasttime);
-                          },
-                        ),
-                      ],
-                    );
-                  });
-            },
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Row(children: [
-                Container(
-                    child: categoryIcons[lasttime?.category ??
-                        Icon(
-                          Icons.home,
-                          size: 30,
-                        )]),
-                SizedBox(
-                  width: 10,
-                ),
-                Expanded(
-                    flex: 1,
-                    child: Row(
-                      children: [
-                        Text(
-                          lasttime?.title ?? ' ',
-                          style: TextStyle(fontSize: 18),
-                        ),
-                      ],
-                    )),
-                Text(
-                  '${lasttime?.targetTime!.day.toString() ?? ' '}/${lasttime?.targetTime!.month.toString() ?? ' '}',
-                  style: TextStyle(fontSize: 20),
-                ),
-              ]),
-            ),
-          )),
+                          ElevatedButton(
+                            child: Text('Completed'),
+                            onPressed: () {
+                              Navigator.of(dialogContext).pop();
+                              pressAction!(false, lasttime);
+                            },
+                          ),
+                        ],
+                      );
+                    });
+              },
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Row(children: [
+                  Container(
+                      child: categoryIcons[lasttime?.category ??
+                          Icon(
+                            Icons.home,
+                            size: 30,
+                          )]),
+                  SizedBox(
+                    width: 10,
+                  ),
+                  Expanded(
+                      flex: 1,
+                      child: Row(
+                        children: [
+                          Text(
+                            lasttime?.title ?? ' ',
+                            style: TextStyle(fontSize: 18),
+                          ),
+                        ],
+                      )),
+                  Text(
+                    '${lasttime?.targetTime!.day.toString() ?? ' '}/${lasttime?.targetTime!.month.toString() ?? ' '}',
+                    style: TextStyle(fontSize: 20),
+                  ),
+                ]),
+              ),
+            )),
+      ),
     );
   }
 }
