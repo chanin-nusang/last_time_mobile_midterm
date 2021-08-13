@@ -62,19 +62,19 @@ class _HomeState extends State<Home> {
     });
   }
 
-  void deleteItem(LastTime item) {
-    int index = lastTimeBox
-        .indexWhere((element) => element.targetTime == item.targetTime);
-    lastTimeBox.removeAt(index);
-    box.delete(index);
-    box.clear();
-    if (lastTimeBox.isNotEmpty) {
-      lastTimeBox.asMap().forEach((index, value) {
-        box.put(index, value);
-      });
-    }
-    pullLastTime();
-  }
+  // void deleteItem(LastTime item) {
+  //   int index = lastTimeBox
+  //       .indexWhere((element) => element.targetTime == item.targetTime);
+  //   lastTimeBox.removeAt(index);
+  //   box.delete(index);
+  //   box.clear();
+  //   if (lastTimeBox.isNotEmpty) {
+  //     lastTimeBox.asMap().forEach((index, value) {
+  //       box.put(index, value);
+  //     });
+  //   }
+  //   pullLastTime();
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -326,9 +326,9 @@ class _HomeState extends State<Home> {
 }
 
 class LasttimeTile extends StatelessWidget {
-  LasttimeTile({@required this.lasttime});
+  LasttimeTile({@required this.lasttime, @required this.pressAction});
   final LastTime? lasttime;
-
+  final VoidCallback? pressAction;
   static Map<String, Icon> categoryIcons = {
     'Chores': Icon(
       Icons.home_outlined,
@@ -347,6 +347,23 @@ class LasttimeTile extends StatelessWidget {
       size: 30,
     ),
   };
+
+  void deleteItem(LastTime item) {
+    var box = Hive.box<LastTime>('lasttime');
+    List<LastTime> lastTimeBox = [];
+    lastTimeBox = box.values.toList();
+    int index = lastTimeBox
+        .indexWhere((element) => element.targetTime == item.targetTime);
+    lastTimeBox.removeAt(index);
+    box.delete(index);
+    box.clear();
+    if (lastTimeBox.isNotEmpty) {
+      lastTimeBox.asMap().forEach((index, value) {
+        box.put(index, value);
+      });
+    }
+    _HomeState().pullLastTime();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -390,8 +407,8 @@ class LasttimeTile extends StatelessWidget {
                             ),
                           ),
                           onPressed: () {
-                            Navigator.of(dialogContext).pop();
-                            _HomeState().deleteItem(lasttime!);
+                            deleteItem(lasttime!);
+                            Navigator.of(dialogContext).pop(context);
                           },
                         ),
                         ElevatedButton(
