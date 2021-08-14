@@ -1,6 +1,7 @@
 # last_time_mobile_midterm
 
-A new Flutter project.
+Chanin Nusang 6110110589
+Youtube link : https://youtu.be/1CbdNhlf1SE
 
 ## Getting Started
 
